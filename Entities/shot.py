@@ -1,11 +1,12 @@
 import pygame as pg
+from Utils import globals
 
 
 class Shot(pg.sprite.Sprite):
     """ a bullet the Player sprite fires.
     """
 
-    speed = -11
+    speed = -1100
     images = []
 
     def __init__(self, pos):
@@ -18,6 +19,6 @@ class Shot(pg.sprite.Sprite):
 
         Every tick we move the shot upwards.
         """
-        self.rect.move_ip(0, self.speed)
+        self.rect.move_ip(0, self.speed * globals.dt)
         if self.rect.top <= 0:
             self.kill()

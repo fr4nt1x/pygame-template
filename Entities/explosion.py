@@ -1,12 +1,12 @@
 import pygame as pg
-
+from Utils import globals
 
 class Explosion(pg.sprite.Sprite):
     """ An explosion. Hopefully the Alien and not the player!
     """
 
-    defaultlife = 12
-    animcycle = 3
+    defaultlife = max(1, int(0.3*globals.FRAMERATE))
+    animcycle = max(1, int(36/globals.FRAMERATE))
     images = []
 
     def __init__(self, actor):
@@ -24,6 +24,6 @@ class Explosion(pg.sprite.Sprite):
         Also we animate the explosion.
         """
         self.life = self.life - 1
-        self.image = self.images[self.life // self.animcycle % 2]
+        self.image = self.images[(self.life // self.animcycle) % 2]
         if self.life <= 0:
             self.kill()

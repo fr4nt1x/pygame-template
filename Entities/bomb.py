@@ -1,13 +1,14 @@
 import pygame as pg
 
 from Entities.explosion import Explosion
+from Utils import globals
 
 
 class Bomb(pg.sprite.Sprite):
     """ A bomb the aliens drop.
     """
 
-    speed = 9
+    speed = 200.0
     images = []
 
     def __init__(self, alien):
@@ -24,7 +25,7 @@ class Bomb(pg.sprite.Sprite):
         - make an explosion.
         - remove the Bomb.
         """
-        self.rect.move_ip(0, self.speed)
-        if self.rect.bottom >= 470:
+        self.rect.move_ip(0, self.speed*globals.dt)
+        if self.rect.bottom >= globals.SCREENRECT.bottom:
             Explosion(self)
             self.kill()
