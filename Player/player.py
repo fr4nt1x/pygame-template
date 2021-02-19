@@ -9,10 +9,13 @@ class Player(pg.sprite.Sprite):
     """ Representing the player as a moon buggy type car.
     """
 
-    speed = 500.0
+    gravity = 1500.0
+    speed = 0.0
+    max_speed = 2000.0
     bounce = 24
     gun_offset = -11
     images = []
+
 
     def __init__(self):
         pg.sprite.Sprite.__init__(self, self.containers)
@@ -21,23 +24,23 @@ class Player(pg.sprite.Sprite):
         self.reloading = 0
         self.origtop = self.rect.top
         self.facing = -1
+        self.on_ground = True
+        self.accel = 0
 
-    def move(self, directionx, directiony):
-        x = 0
-        y = 0
-        self.origtop = self.rect.top
-        if directionx:
-            self.facing = directionx
-            x = self.speed*globals.dt*directionx
-        if directiony:
-            y = self.speed*globals.dt*directiony
-        self.rect.move_ip(x, y)
+    def move(self, jumping=False):
+
+        if self.speed <= self.max_speed:
+            self.speed += self.gravity * globals.dt
+
+        if jumping and self.on_ground:
+            self.on_ground = False
+            self.speed = -1000
+
+        if self.rect.bottom >= globals.SCREENRECT.height:
+            self.on_ground = True
+
+        self.rect.move_ip(0, self.speed*globals.dt)
         self.rect = self.rect.clamp(globals.SCREENRECT)
-        if directionx < 0:
-            self.image = self.images[0]
-        elif directionx > 0:
-            self.image = self.images[1]
-        #self.rect.top = self.origtop - (self.rect.left // self.bounce % 2)
 
     def gunpos(self):
         pos = self.facing * self.gun_offset + self.rect.centerx

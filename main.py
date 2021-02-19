@@ -76,7 +76,6 @@ def main(winstyle=0):
     aliens, all, bombs, lastalien, shots = initiate_containers()
 
     # Create Some Starting Values
-    alienreload = globals.ALIEN_RELOAD
     clock = pg.time.Clock()
 
     # initialize our starting sprites
@@ -101,52 +100,21 @@ def main(winstyle=0):
         # update all the sprites
         all.update()
 
-        # handle player input
-        directionx = keystate[pg.K_RIGHT] - keystate[pg.K_LEFT]
-        directiony = keystate[pg.K_DOWN] - keystate[pg.K_UP]
-        player.move(directionx, directiony)
-        firing = keystate[pg.K_SPACE]
-        if not player.reloading and firing and len(shots) < globals.MAX_SHOTS:
-            Shot(player.gunpos())
-            if pg.mixer:
-                shoot_sound.play()
-        player.reloading = firing
-
-        # Create new alien
-        if alienreload:
-            alienreload = alienreload - 1
-        elif not int(random.random() * globals.dt):
+        globals.alien_countdown -= globals.dt
+        if globals.alien_countdown <= 0:
+            globals.alien_countdown = random.random()+globals.ALIEN_RELOAD
             Enemy()
-            alienreload = globals.ALIEN_RELOAD
+        # handle player input
 
-        # Drop bombs
-        if lastalien and not int(random.random() * globals.BOMB_ODDS):
-            Bomb(lastalien.sprite)
+        jumping = keystate[pg.K_SPACE]
+        player.move(jumping)
 
         # Detect collisions between aliens and players.
-        for alien in pg.sprite.spritecollide(player, aliens, 1):
-            if pg.mixer:
-                boom_sound.play()
-            Explosion(alien)
-            Explosion(player)
-            globals.SCORE = globals.SCORE + 1
-            player.kill()
+        for alien in pg.sprite.spritecollide(player, aliens, 0):
+            player.on_ground = True
+            player.rect.bottom = alien.rect.top
 
-        # See if shots hit the aliens.
-        for alien in pg.sprite.groupcollide(shots, aliens, 1, 1).keys():
-            if pg.mixer:
-                boom_sound.play()
-            Explosion(alien)
-            globals.SCORE = globals.SCORE + 1
-
-        # See if alien bombs hit the player.
-        for bomb in pg.sprite.spritecollide(player, bombs, 1):
-            if pg.mixer:
-                boom_sound.play()
-            Explosion(player)
-            Explosion(bomb)
-            player.kill()
-
+        
         # draw the scene
         dirty = all.draw(globals.screen)
         pg.display.update(dirty)

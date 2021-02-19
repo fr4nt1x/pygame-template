@@ -17,7 +17,10 @@ class Enemy(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[0]
         self.rect = self.image.get_rect()
-        self.facing = random.choice((-1, 1)) * Enemy.speed
+
+        
+        self.rect.bottom = random.randint(globals.SCREENRECT.y, globals.SCREENRECT.height)
+        self.facing = -(1.0+random.random())*Enemy.speed
         self.frame = 0
         if self.facing < 0:
             self.rect.right = globals.SCREENRECT.right
@@ -25,8 +28,6 @@ class Enemy(pg.sprite.Sprite):
     def update(self):
         self.rect.move_ip(self.facing*globals.dt, 0)
         if not globals.SCREENRECT.contains(self.rect):
-            self.facing = -self.facing
-            self.rect.top = self.rect.bottom + 1
-            self.rect = self.rect.clamp(globals.SCREENRECT)
+            self.kill()
         self.frame = self.frame + 1
         self.image = self.images[(self.frame // self.animcycle) % 3]
