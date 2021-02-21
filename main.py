@@ -32,12 +32,12 @@ import pygame as pg
 # see if we can load more than standard BMP
 from Utils import globals
 from Entities.bomb import Bomb
-from Entities.enemy import Enemy
+from Entities.platform import Platform
 from Entities.explosion import Explosion
 from Player.player import Player
 from Utils.score import Score
 from Entities.shot import Shot
-from Utils.utils import load_image, load_sound
+from Utils.utils import load_image, load_sound, colliding
 from data.data_utils import get_data_dir
 if not pg.image.get_extended():
     raise SystemExit("Sorry, extended image module required")
@@ -57,7 +57,7 @@ def main(winstyle=0):
     load_all_images()
 
     # decorate the game window
-    icon = pg.transform.scale(Enemy.images[0], (32, 32))
+    icon = pg.transform.scale(Platform.images[0], (32, 32))
     pg.display.set_icon(icon)
     pg.display.set_caption("Pygame Aliens")
     pg.mouse.set_visible(0)
@@ -80,7 +80,7 @@ def main(winstyle=0):
 
     # initialize our starting sprites
     player = Player()
-    Enemy()  # note, this 'lives' because it goes into a sprite group
+    Platform()  # note, this 'lives' because it goes into a sprite group
     if pg.font:
         all.add(Score())
 
@@ -103,16 +103,22 @@ def main(winstyle=0):
         globals.alien_countdown -= globals.dt
         if globals.alien_countdown <= 0:
             globals.alien_countdown = random.random()+globals.ALIEN_RELOAD
-            Enemy()
+            Platform()
         # handle player input
 
         jumping = keystate[pg.K_SPACE]
-        player.move(jumping)
+        right = 0
+        left = 0
 
-        # Detect collisions between aliens and players.
-        for alien in pg.sprite.spritecollide(player, aliens, 0):
+        right = keystate[pg.K_RIGHT]
+        left = -1*keystate[pg.K_LEFT]
+
+        player.move(right+left, jumping)
+
+        # Detect collisions between platform and players.
+        for platform in pg.sprite.spritecollide(player, aliens, 0, colliding):
             player.on_ground = True
-            player.rect.bottom = alien.rect.top
+            player.rect.bottom = platform.rect.top
 
         
         # draw the scene
@@ -189,7 +195,7 @@ def initiate_containers():
     lastalien = pg.sprite.GroupSingle()
     # assign default groups to each sprite class
     Player.containers = all
-    Enemy.containers = aliens, all, lastalien
+    Platform.containers = aliens, all, lastalien
     Shot.containers = shots, all
     Bomb.containers = bombs, all
     Explosion.containers = all
@@ -203,7 +209,7 @@ def load_all_images():
     Player.load_image()
     img = load_image("explosion1.gif")
     Explosion.images = [img, pg.transform.flip(img, 1, 1)]
-    Enemy.images = [load_image(im) for im in ("alien1.gif", "alien2.gif", "alien3.gif")]
+    Platform.images = [load_image(im) for im in ("alien1.gif", "alien2.gif", "alien3.gif")]
     Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
 

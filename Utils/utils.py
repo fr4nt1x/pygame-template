@@ -16,6 +16,9 @@ def load_image(file):
     return surface.convert()
 
 
+def colliding(rect1, rect2):
+    return False
+
 def load_sound(file):
     """ because pygame can be be compiled without mixer.
     """

@@ -10,8 +10,8 @@ class Player(pg.sprite.Sprite):
     """
 
     gravity = 1500.0
-    speed = 0.0
-    max_speed = 2000.0
+    speed = [400, 0.0]
+    max_speed = [globals.SCREENRECT.width, globals.SCREENRECT.height]
     bounce = 24
     gun_offset = -11
     images = []
@@ -25,26 +25,28 @@ class Player(pg.sprite.Sprite):
         self.origtop = self.rect.top
         self.facing = -1
         self.on_ground = True
-        self.accel = 0
 
-    def move(self, jumping=False):
+    def move(self, facing=0, jumping=False):
 
-        if self.speed <= self.max_speed:
-            self.speed += self.gravity * globals.dt
-
+        
+        if self.speed[1] <= self.max_speed[1]:
+            self.speed[1] += self.gravity * globals.dt
+        
         if jumping and self.on_ground:
             self.on_ground = False
-            self.speed = -1000
+            self.speed[1] = -self.max_speed[1] 
 
-        if self.rect.bottom >= globals.SCREENRECT.height:
+
+        self.rect.move_ip(facing*self.speed[0]*globals.dt,
+                self.speed[1]*globals.dt)
+
+        if self.rect.bottom > globals.SCREENRECT.bottom:
+            self.rect.bottom = globals.SCREENRECT.bottom 
             self.on_ground = True
-
-        self.rect.move_ip(0, self.speed*globals.dt)
-        self.rect = self.rect.clamp(globals.SCREENRECT)
-
-    def gunpos(self):
-        pos = self.facing * self.gun_offset + self.rect.centerx
-        return pos, self.rect.top
+        if self.rect.right > globals.SCREENRECT.right:
+            self.rect.right = globals.SCREENRECT.right
+        elif self.rect.left < globals.SCREENRECT.left:
+            self.rect.left = globals.SCREENRECT.left
 
     @staticmethod
     def load_image():
