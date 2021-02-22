@@ -1,7 +1,5 @@
 import random
-
 import pygame as pg
-
 from Utils import globals
 
 
@@ -9,7 +7,7 @@ class Platform(pg.sprite.Sprite):
     """ An platform. That slowly moves down the screen.
     """
 
-    speed = globals.SCREENRECT.width*0.3
+    default_speed = [globals.SCREENRECT.width * 0.3, 0.0]
     animcycle = max(1, int(1440/globals.FRAMERATE))
     images = []
 
@@ -23,14 +21,12 @@ class Platform(pg.sprite.Sprite):
                                   globals.SCREENRECT.width+self.rect.width,
                                   globals.SCREENRECT.height+self.rect.height)
 
-        
         self.rect.bottom = random.randint(globals.SCREENRECT.y, globals.SCREENRECT.height)
-        self.facing = -(1.0+random.random())*Platform.speed
+        self.speed = [-(1.0 + random.random()) * Platform.default_speed[0], Platform.default_speed[1]]
         self.frame = 0
-        if self.facing < 0:
-            self.rect.right = globals.SCREENRECT.right
+        self.rect.right = globals.SCREENRECT.right
 
     def update(self):
-        self.rect.move_ip(self.facing*globals.dt, 0)
+        self.rect.move_ip(self.speed[0] * globals.dt, self.speed[1] * globals.dt)
         if not self.screenrect.contains(self.rect):
             self.kill()

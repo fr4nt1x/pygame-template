@@ -10,7 +10,8 @@ class Player(pg.sprite.Sprite):
     """
 
     gravity = 1500.0
-    speed = [400, 0.0]
+    speed = [0.0, 0.0]
+    relative_speed = [0.0, 0.0]
     max_speed = [globals.SCREENRECT.width, globals.SCREENRECT.height]
     bounce = 24
     gun_offset = -11
@@ -23,26 +24,30 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom=globals.SCREENRECT.midbottom)
         self.reloading = 0
         self.origtop = self.rect.top
-        self.facing = -1
         self.on_ground = True
+        self.can_jump = True
 
     def move(self, facing=0, jumping=False):
-
-        
         if self.speed[1] <= self.max_speed[1]:
             self.speed[1] += self.gravity * globals.dt
         
-        if jumping and self.on_ground:
+        if jumping and self.on_ground and self.can_jump:
             self.on_ground = False
-            self.speed[1] = -self.max_speed[1] 
+            self.speed[1] = -self.max_speed[1]
+            self.can_jump = False
+        elif not jumping:
+            self.can_jump = True
+        self.speed[0] = facing * self.max_speed[0]
 
-
-        self.rect.move_ip(facing*self.speed[0]*globals.dt,
-                self.speed[1]*globals.dt)
+        print("speed", self.speed)
+        print("rel Speed", self.relative_speed)
+        self.rect.move_ip((self.speed[0]+self.relative_speed[0])*globals.dt,
+                          (self.speed[1]+self.relative_speed[1])*globals.dt)
 
         if self.rect.bottom > globals.SCREENRECT.bottom:
             self.rect.bottom = globals.SCREENRECT.bottom 
             self.on_ground = True
+
         if self.rect.right > globals.SCREENRECT.right:
             self.rect.right = globals.SCREENRECT.right
         elif self.rect.left < globals.SCREENRECT.left:

@@ -1,7 +1,5 @@
 import os
-
 import pygame as pg
-
 from data.data_utils import get_data_dir
 
 
@@ -15,9 +13,6 @@ def load_image(file):
         raise SystemExit('Could not load image "%s" %s' % (file, pg.get_error()))
     return surface.convert()
 
-
-def colliding(rect1, rect2):
-    return False
 
 def load_sound(file):
     """ because pygame can be be compiled without mixer.

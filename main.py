@@ -31,24 +31,14 @@ import pygame as pg
 
 # see if we can load more than standard BMP
 from Utils import globals
-from Entities.bomb import Bomb
 from Entities.platform import Platform
-from Entities.explosion import Explosion
+
 from Player.player import Player
 from Utils.score import Score
 from Entities.shot import Shot
-from Utils.utils import load_image, load_sound, colliding
-from data.data_utils import get_data_dir
+from Utils.utils import load_image, load_sound
 if not pg.image.get_extended():
     raise SystemExit("Sorry, extended image module required")
-
-
-# Each type of game object gets an init and an update function.
-# The update function is called once per frame, and it is when each object should
-# change it's current position and state.
-#
-# The Player object actually gets a "move" function instead of update,
-# since it is passed extra information about the keyboard.
 
 def main(winstyle=0):
     # Initialize pygame
@@ -104,23 +94,23 @@ def main(winstyle=0):
         if globals.alien_countdown <= 0:
             globals.alien_countdown = random.random()+globals.ALIEN_RELOAD
             Platform()
-        # handle player input
 
+        # Detect collisions between platform and players.
+        player.relative_speed[0] = 0.0
+        for platform in pg.sprite.spritecollide(player, aliens, 0):
+            player.on_ground = True
+            player.speed[1] = player.max_speed[1]
+            player.relative_speed[0] = platform.speed[0]
+            player.rect.bottom = platform.rect.top
+
+        # handle player input
         jumping = keystate[pg.K_SPACE]
-        right = 0
-        left = 0
 
         right = keystate[pg.K_RIGHT]
         left = -1*keystate[pg.K_LEFT]
 
         player.move(right+left, jumping)
 
-        # Detect collisions between platform and players.
-        for platform in pg.sprite.spritecollide(player, aliens, 0, colliding):
-            player.on_ground = True
-            player.rect.bottom = platform.rect.top
-
-        
         # draw the scene
         dirty = all.draw(globals.screen)
         pg.display.update(dirty)
@@ -197,8 +187,6 @@ def initiate_containers():
     Player.containers = all
     Platform.containers = aliens, all, lastalien
     Shot.containers = shots, all
-    Bomb.containers = bombs, all
-    Explosion.containers = all
     Score.containers = all
     return aliens, all, bombs, lastalien, shots
 
@@ -207,10 +195,7 @@ def load_all_images():
     # Load images, assign to sprite classes
     # (do this before the classes are used, after screen setup)
     Player.load_image()
-    img = load_image("explosion1.gif")
-    Explosion.images = [img, pg.transform.flip(img, 1, 1)]
     Platform.images = [load_image(im) for im in ("alien1.gif", "alien2.gif", "alien3.gif")]
-    Bomb.images = [load_image("bomb.gif")]
     Shot.images = [load_image("shot.gif")]
 
 
