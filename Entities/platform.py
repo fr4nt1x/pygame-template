@@ -7,13 +7,13 @@ class Platform(pg.sprite.Sprite):
     """ An platform. That slowly moves down the screen.
     """
 
-    default_speed = [globals.SCREENRECT.width * 0.3, 0.0]
+    default_speed = [globals.SCREENRECT.width * 0.15, 0.0]
     animcycle = max(1, int(1440/globals.FRAMERATE))
     images = []
 
     def __init__(self):
         pg.sprite.Sprite.__init__(self, self.containers)
-        self.image = pg.Surface([200, globals.SCREENRECT.height*0.02])
+        self.image = pg.Surface([globals.SCREENRECT.width * 0.05, globals.SCREENRECT.height*0.02])
         self.image.fill(pg.Color(100,0,0))
         self.rect = self.image.get_rect()
         self.screenrect = pg.Rect(globals.SCREENRECT.x-self.rect.width,
@@ -27,6 +27,8 @@ class Platform(pg.sprite.Sprite):
         self.rect.right = globals.SCREENRECT.right
 
     def update(self):
-        self.rect.move_ip(self.speed[0] * globals.dt, self.speed[1] * globals.dt)
+        x = (self.speed[0] + globals.screen_speed[0]) * globals.dt
+        y = (self.speed[1] + globals.screen_speed[1]) * globals.dt
+        self.rect.move_ip(x, y)
         if not self.screenrect.contains(self.rect):
             self.kill()

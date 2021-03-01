@@ -12,18 +12,16 @@ class Player(pg.sprite.Sprite):
     gravity = 1500.0
     speed = [0.0, 0.0]
     relative_speed = [0.0, 0.0]
-    max_speed = [globals.SCREENRECT.width, globals.SCREENRECT.height]
+    max_speed = [globals.SCREENRECT.width*0.5, globals.SCREENRECT.height]
     bounce = 24
     gun_offset = -11
     images = []
 
-
     def __init__(self):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[0]
-        self.rect = self.image.get_rect(midbottom=globals.SCREENRECT.midbottom)
+        self.rect = self.image.get_rect(midbottom=globals.SCREENRECT.center)
         self.reloading = 0
-        self.origtop = self.rect.top
         self.on_ground = True
         self.can_jump = True
 
@@ -39,10 +37,8 @@ class Player(pg.sprite.Sprite):
             self.can_jump = True
         self.speed[0] = facing * self.max_speed[0]
 
-        print("speed", self.speed)
-        print("rel Speed", self.relative_speed)
-        self.rect.move_ip((self.speed[0]+self.relative_speed[0])*globals.dt,
-                          (self.speed[1]+self.relative_speed[1])*globals.dt)
+        self.rect.move_ip((self.speed[0]+self.relative_speed[0]+globals.screen_speed[0])*globals.dt,
+                          (self.speed[1]+self.relative_speed[1]+globals.screen_speed[1])*globals.dt)
 
         if self.rect.bottom > globals.SCREENRECT.bottom:
             self.rect.bottom = globals.SCREENRECT.bottom 
@@ -56,4 +52,4 @@ class Player(pg.sprite.Sprite):
     @staticmethod
     def load_image():
         img = load_image("player1.gif")
-        Player.images = [img, pg.transform.flip(img, 1, 0)]
+        Player.images = [pg.transform.scale(img, (int(0.05*globals.SCREENRECT.width), int(0.05*globals.SCREENRECT.height)))]

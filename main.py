@@ -63,19 +63,19 @@ def main(winstyle=0):
         # pg.mixer.music.load(music)
         # pg.mixer.music.play(-1)
 
-    aliens, all, bombs, lastalien, shots = initiate_containers()
+    platforms, all, bombs, lastalien, shots = initiate_containers()
 
     # Create Some Starting Values
     clock = pg.time.Clock()
 
     # initialize our starting sprites
-    player = Player()
+    globals.player_object = Player()
     Platform()  # note, this 'lives' because it goes into a sprite group
     if pg.font:
         all.add(Score())
 
     # Run our main loop whilst the player is alive.
-    while player.alive():
+    while globals.player_object.alive():
 
         # get input
 
@@ -90,18 +90,18 @@ def main(winstyle=0):
         # update all the sprites
         all.update()
 
-        globals.alien_countdown -= globals.dt
-        if globals.alien_countdown <= 0:
-            globals.alien_countdown = random.random()+globals.ALIEN_RELOAD
+        globals.platform_countdown -= globals.dt
+        if globals.platform_countdown <= 0:
+            globals.platform_countdown = random.random() + globals.PLATFORM_RELOAD_TIME
             Platform()
 
         # Detect collisions between platform and players.
-        player.relative_speed[0] = 0.0
-        for platform in pg.sprite.spritecollide(player, aliens, 0):
-            player.on_ground = True
-            player.speed[1] = player.max_speed[1]
-            player.relative_speed[0] = platform.speed[0]
-            player.rect.bottom = platform.rect.top
+        globals.player_object.relative_speed[0] = 0.0
+        for platform in pg.sprite.spritecollide(globals.player_object, platforms, 0):
+            globals.player_object.on_ground = True
+            globals.player_object.speed[1] = 0
+            globals.player_object.relative_speed[0] = platform.speed[0]
+            globals.player_object.rect.bottom = platform.rect.top
 
         # handle player input
         jumping = keystate[pg.K_SPACE]
@@ -109,9 +109,16 @@ def main(winstyle=0):
         right = keystate[pg.K_RIGHT]
         left = -1*keystate[pg.K_LEFT]
 
-        player.move(right+left, jumping)
+        if globals.player_object.rect.right >= (globals.SCREENRECT.width)/3:
+            globals.screen_speed[0] = -900
+        else:
+            globals.screen_speed[0] = 0
+        #elif globals.player_object.rect.right < (globals.SCREENRECT.width)/3:
+           # globals.screen_speed[0] = 0
+        globals.player_object.move(right+left, jumping)
 
-        # draw the scene
+
+            # draw the scene
         dirty = all.draw(globals.screen)
         pg.display.update(dirty)
 
@@ -153,7 +160,9 @@ def handle_events():
 
 def initiate_background():
     # create the background, tile the bgd image
-    bgdtile = load_image("background.gif")
+    #bgdtile = load_image("background.gif")
+    bgdtile = pg.Surface([globals.SCREENRECT.width, globals.SCREENRECT.height])
+    bgdtile.fill(pg.Color(0, 50, 100))
     background = pg.Surface(globals.SCREENRECT.size)
     pg.transform.scale(bgdtile, globals.SCREENRECT.size, background)
     globals.screen.blit(background, (0, 0))
@@ -178,17 +187,17 @@ def initiate_pygame():
 
 def initiate_containers():
     # Initialize Game Groups
-    aliens = pg.sprite.Group()
+    platforms = pg.sprite.Group()
     shots = pg.sprite.Group()
     bombs = pg.sprite.Group()
     all = pg.sprite.RenderUpdates()
     lastalien = pg.sprite.GroupSingle()
     # assign default groups to each sprite class
     Player.containers = all
-    Platform.containers = aliens, all, lastalien
+    Platform.containers = platforms, all, lastalien
     Shot.containers = shots, all
     Score.containers = all
-    return aliens, all, bombs, lastalien, shots
+    return platforms, all, bombs, lastalien, shots
 
 
 def load_all_images():
